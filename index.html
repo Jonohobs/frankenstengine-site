@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frankenstengine — Coming Soon</title>
+<meta name="description" content="A game engine weaving together the best open-source tools and gamifying them — benchmarked against PlayStation Dreams and Game Builder Garage">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+:root{
+  --bg:#07070e;--bg2:#0a0a14;--accent:#f97316;--dim:#333;
+  --green:#22c55e;--purple:#8b5cf6;--orange:#f97316;--cyan:#06b6d4;--grey:#a0a0a0;--blue:#3b82f6;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:#c8c8d0;font-family:'Share Tech Mono',monospace;overflow-x:hidden}
+
+/* Scanline overlay on entire page */
+body::after{
+  content:'';position:fixed;top:0;left:0;right:0;bottom:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,#00000012 3px,#00000012 6px);
+  pointer-events:none;z-index:9999;
+}
+
+/* ===== HERO ===== */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;text-align:center;padding:2rem 1rem;
+  background:radial-gradient(ellipse at 50% 30%,#12121e 0%,var(--bg) 70%);
+}
+.hero::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M30 0v60M0 30h60' stroke='%23ffffff06' stroke-width='0.5'/%3E%3C/svg%3E");
+  pointer-events:none;
+}
+
+.logo-text{
+  font-family:'Orbitron',monospace;font-weight:900;
+  font-size:clamp(2.2rem,7vw,5rem);letter-spacing:0.12em;
+  color:transparent;
+  background:linear-gradient(135deg,#f97316 0%,#fb923c 40%,#fbbf24 100%);
+  -webkit-background-clip:text;background-clip:text;
+  text-shadow:0 0 60px #f9731640,0 0 120px #f9731620;
+  position:relative;z-index:1;
+  animation:glow 4s ease-in-out infinite alternate;
+}
+@keyframes glow{
+  0%{filter:brightness(1) drop-shadow(0 0 20px #f9731630)}
+  100%{filter:brightness(1.15) drop-shadow(0 0 40px #f9731650)}
+}
+.coming-soon{
+  font-family:'Orbitron',monospace;font-weight:700;font-size:clamp(0.7rem,2vw,1rem);
+  letter-spacing:0.4em;text-transform:uppercase;
+  color:#f97316;margin-top:0.8rem;
+  border:1px solid #f9731640;padding:0.4em 1.5em;
+  position:relative;z-index:1;
+  animation:pulse-border 3s ease-in-out infinite;
+}
+@keyframes pulse-border{
+  0%,100%{border-color:#f9731630;box-shadow:0 0 10px #f9731610}
+  50%{border-color:#f9731680;box-shadow:0 0 20px #f9731630}
+}
+.tagline{
+  max-width:680px;margin-top:2rem;font-size:clamp(0.8rem,1.8vw,1.05rem);
+  color:#888;line-height:1.7;position:relative;z-index:1;
+}
+.tagline em{color:#bbb;font-style:normal}
+
+.scroll-hint{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  font-size:0.65rem;color:#444;letter-spacing:0.3em;text-transform:uppercase;
+  animation:bob 2s ease-in-out infinite;z-index:1;
+}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+/* ===== FACTIONS SECTION ===== */
+.factions-section{
+  padding:3rem 1rem 4rem;
+  background:linear-gradient(180deg,var(--bg) 0%,#0c0c18 50%,var(--bg) 100%);
+}
+.section-title{
+  text-align:center;font-family:'Orbitron',monospace;font-weight:700;
+  font-size:clamp(1rem,3vw,1.5rem);letter-spacing:0.15em;color:#666;
+  margin-bottom:2rem;text-transform:uppercase;
+}
+.gallery{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+  max-width:1200px;margin:0 auto;
+}
+@media(max-width:900px){.gallery{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.gallery{grid-template-columns:1fr}}
+
+.panel{
+  position:relative;border:1px solid #1a1a2e;overflow:hidden;
+  cursor:grab;aspect-ratio:3/4;min-height:300px;
+  background:var(--bg2);transition:border-color 0.3s;
+}
+.panel:hover{border-color:#f9731640}
+.panel:active{cursor:grabbing}
+.panel canvas{display:block;width:100%!important;height:100%!important}
+.label{
+  position:absolute;bottom:0;left:0;right:0;padding:12px 16px;
+  background:linear-gradient(transparent,#07070ecc 30%,#07070e);
+  pointer-events:none;z-index:4;
+}
+.label h2{font-family:'Orbitron',monospace;font-size:clamp(0.65rem,1.5vw,0.85rem);font-weight:700;margin-bottom:2px;letter-spacing:0.05em}
+.label .class{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:3px;opacity:0.8}
+.label p{font-size:0.6rem;color:#555;line-height:1.4}
+.scanline{position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,#00000015 2px,#00000015 4px);pointer-events:none;z-index:2}
+.crt{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:3;box-shadow:inset 0 0 80px #00000060;border-radius:2px}
+
+/* ===== FOOTER ===== */
+.footer{
+  text-align:center;padding:3rem 1rem 2rem;
+  border-top:1px solid #1a1a2e;
+}
+.footer p{font-size:0.65rem;color:#333;letter-spacing:0.1em}
+.footer a{color:#f97316;text-decoration:none}
+.footer a:hover{text-decoration:underline}
+
+/* ===== FEATURES STRIP ===== */
+.features{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem 3rem;
+  max-width:900px;margin:2.5rem auto 0;position:relative;z-index:1;
+}
+.feature{text-align:center;flex:0 0 auto}
+.feature .icon{font-size:1.4rem;margin-bottom:0.3rem}
+.feature .text{font-size:0.65rem;color:#555;letter-spacing:0.08em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="logo-text">Frankenstengine</div>
+  <div class="coming-soon">Coming Soon</div>
+  <p class="tagline">
+    A game engine weaving together the best open-source tools and gamifying them
+    &mdash; benchmarked against <em>PlayStation Dreams</em> and <em>Game Builder Garage</em>.
+  </p>
+  <div class="features">
+    <div class="feature"><div class="icon">&#9881;</div><div class="text">Engineered from Customised Open-Source Parts</div></div>
+    <div class="feature"><div class="icon">&#9670;</div><div class="text">6 Factions</div></div>
+    <div class="feature"><div class="icon">&#9733;</div><div class="text">FTUX Focused</div></div>
+    <div class="feature"><div class="icon">&#9732;</div><div class="text">Gamified Game-Engine</div></div>
+  </div>
+  <div class="scroll-hint">&#9660; Meet the Factions &#9660;</div>
+</section>
+
+<!-- FACTIONS -->
+<section class="factions-section">
+  <div class="section-title">The Six Factions</div>
+  <div class="section-subtitle" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#888;letter-spacing:0.08em;margin-top:-0.5rem;margin-bottom:1.5rem;text-transform:uppercase;">[ Initial concept art ]</div>
+  <div class="gallery">
+    <div class="panel" id="p0">
+      <div class="scanline"></div><div class="crt"></div>
+      <div class="label">
+        <div class="class" style="color:#22c55e">Bioforge Race</div>
+        <h2 style="color:#22c55e">The Incubator</h2>
+        <p>Augmented human birthing tech from ceramic eggs. Circuit veins pulse beneath skin.</p>
+      </div>
+    </div>
+    <div class="panel" id="p1">
+      <div class="scanline"></div><div class="crt"></div>
+      <div class="label">
+        <div class="class" style="color:#8b5cf6">Nanofilament Weaver</div>
+        <h2 style="color:#8b5cf6">The Spinner</h2>
+        <p>Wrist spinnerets fire invisible nanotubes. Looks like magic &mdash; it's engineering.</p>
+      </div>
+    </div>
+    <div class="panel" id="p2">
+      <div class="scanline"></div><div class="crt"></div>
+      <div class="label">
+        <div class="class" style="color:#f97316">AI Voice Bard</div>
+        <h2 style="color:#f97316">The Larper</h2>
+        <p>Works in illusion and fantasy. Rolls dice, reads tarot, consults numerology and divination for their next move. Wields an AI voice synthesizer that can speak in any voice, make any sound.</p>
+      </div>
+    </div>
+    <div class="panel" id="p3">
+      <div class="scanline"></div><div class="crt"></div>
+      <div class="label">
+        <div class="class" style="color:#06b6d4">Jungian Tech-Cleric</div>
+        <h2 style="color:#06b6d4">The Architect</h2>
+        <p>Prayers are queries to the collective unconscious. Jungian archetypes as ability trees.</p>
+      </div>
+    </div>
+    <div class="panel" id="p4">
+      <div class="scanline"></div><div class="crt"></div>
+      <div class="label">
+        <div class="class" style="color:#a0a0a0">Anti-AI Saboteur</div>
+        <h2 style="color:#a0a0a0">The Luddite</h2>
+        <p>Carbon-fibre exo-plate over rejectionist doctrine. Respirator mask, jammer rigs, reactor-core sternum. Pulls the plug on things that think too fast. Protected species.</p>
+      </div>
+    </div>
+    <div class="panel" id="p5">
+      <div class="scanline"></div><div class="crt"></div>
+      <div class="label">
+        <div class="class" style="color:#3b82f6">Censorate Order</div>
+        <h2 style="color:#3b82f6">The Editor</h2>
+        <p>Pristine, symmetric, featureless. Surveillance drones orbit. Everything curated.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>&copy; 2026 DTR Labs Ltd. All rights reserved. All characters, lore, and game designs are original works.</p>
+  <p style="margin-top:0.6rem">&copy; 2026 Jonathan Hobman / Frankenstengine. All rights reserved.</p>
+</footer>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+const WOBBLE = 0.004;
+const BG = 0x07070e;
+
+function createScene(container, buildFn, bgTint) {
+  const w = container.clientWidth, h = container.clientHeight;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(BG);
+  scene.fog = new THREE.Fog(BG, 8, 20);
+
+  const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 50);
+  camera.position.set(0, 1.2, 5);
+  camera.lookAt(0, 0.8, 0);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: false });
+  renderer.setPixelRatio(1);
+  renderer.setSize(w, h);
+  renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+  container.insertBefore(renderer.domElement, container.firstChild);
+
+  // PS2-era lighting
+  const dir1 = new THREE.DirectionalLight(0xffeedd, 1.6);
+  dir1.position.set(3, 5, 4);
+  scene.add(dir1);
+  const dir2 = new THREE.DirectionalLight(0xaabbcc, 0.6);
+  dir2.position.set(-3, 3, -2);
+  scene.add(dir2);
+  scene.add(new THREE.AmbientLight(bgTint, 0.5));
+  scene.add(new THREE.HemisphereLight(0xccccdd, 0x111118, 0.4));
+
+  // Floor grid
+  const grid = new THREE.GridHelper(10, 20, 0x1a1a2e, 0x1a1a2e);
+  grid.position.y = -0.01;
+  scene.add(grid);
+
+  const group = new THREE.Group();
+  scene.add(group);
+  buildFn(group);
+
+  // Vertex wobble (PS2 jitter)
+  function wobbleGeometry(mesh) {
+    if (!mesh.geometry || !mesh.geometry.attributes.position) return;
+    if (!mesh.userData.origPos) {
+      mesh.userData.origPos = mesh.geometry.attributes.position.array.slice();
+    }
+    const pos = mesh.geometry.attributes.position;
+    const orig = mesh.userData.origPos;
+    const t = performance.now() * 0.001;
+    for (let i = 0; i < pos.count; i++) {
+      pos.setX(i, orig[i*3] + Math.sin(t * 3 + i) * WOBBLE);
+      pos.setY(i, orig[i*3+1] + Math.cos(t * 2.7 + i * 1.3) * WOBBLE);
+      pos.setZ(i, orig[i*3+2] + Math.sin(t * 3.3 + i * 0.7) * WOBBLE);
+    }
+    pos.needsUpdate = true;
+  }
+
+  // Drag to rotate
+  let isDragging = false, prevX = 0, rotY = 0;
+  container.addEventListener('mousedown', e => { isDragging = true; prevX = e.clientX; });
+  container.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    rotY += (e.clientX - prevX) * 0.01;
+    prevX = e.clientX;
+  });
+  container.addEventListener('mouseup', () => isDragging = false);
+  container.addEventListener('mouseleave', () => isDragging = false);
+  container.addEventListener('touchstart', e => { isDragging = true; prevX = e.touches[0].clientX; }, {passive:true});
+  container.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    rotY += (e.touches[0].clientX - prevX) * 0.01;
+    prevX = e.touches[0].clientX;
+  }, {passive:true});
+  container.addEventListener('touchend', () => isDragging = false);
+
+  // Intersection Observer — only animate when visible
+  let isVisible = false;
+  const observer = new IntersectionObserver(entries => {
+    isVisible = entries[0].isIntersecting;
+  }, { threshold: 0.1 });
+  observer.observe(container);
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!isVisible) return;
+    if (!isDragging) rotY += 0.004;
+    group.rotation.y = rotY;
+    group.traverse(c => { if (c.isMesh) wobbleGeometry(c); });
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  const ro = new ResizeObserver(() => {
+    const nw = container.clientWidth, nh = container.clientHeight;
+    if (nw === 0 || nh === 0) return;
+    camera.aspect = nw / nh;
+    camera.updateProjectionMatrix();
+    renderer.setSize(nw, nh);
+  });
+  ro.observe(container);
+}
+
+// PS2 materials
+function mat(color) {
+  return new THREE.MeshPhongMaterial({ color, flatShading: true });
+}
+function matE(color, intensity) {
+  return new THREE.MeshPhongMaterial({ color, flatShading: true, emissive: color, emissiveIntensity: intensity || 0.4 });
+}
+function matET(color, opacity, intensity) {
+  return new THREE.MeshPhongMaterial({ color, flatShading: true, emissive: color, emissiveIntensity: intensity || 0.4, transparent: true, opacity });
+}
+
+// =========================================
+// CHARACTER 1: BIOFORGE INCUBATOR
+// =========================================
+function buildBioforge(group) {
+  const skin = 0x8faa8f;
+  const skinLight = 0xa0bba0;
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), mat(skinLight));
+  head.position.y = 2.05;
+  group.add(head);
+
+  for (let i = -1; i <= 1; i += 2) {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 4), matE(0x00ff88));
+    eye.position.set(i * 0.08, 2.08, 0.16);
+    group.add(eye);
+  }
+
+  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.2, 0.8, 8), mat(skin));
+  torso.position.y = 1.4;
+  group.add(torso);
+
+  const core = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), matE(0x22c55e, 0.8));
+  core.position.set(0, 1.5, 0.18);
+  group.add(core);
+
+  for (let i = -1; i <= 1; i += 2) {
+    const strip = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.6, 0.01), matE(0xd4a030, 0.6));
+    strip.position.set(i * 0.15, 1.4, 0.21);
+    group.add(strip);
+  }
+  const hStrip = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.02, 0.01), matE(0xd4a030, 0.6));
+  hStrip.position.set(0, 1.35, 0.21);
+  group.add(hStrip);
+
+  for (let i = -1; i <= 1; i += 2) {
+    const uArm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.35, 8), mat(skin));
+    uArm.position.set(i * 0.32, 1.55, 0);
+    uArm.rotation.z = i * 0.2;
+    group.add(uArm);
+    const fArm = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.35, 8), mat(skin));
+    fArm.position.set(i * 0.3, 1.2, 0.2);
+    fArm.rotation.z = i * -0.15;
+    fArm.rotation.x = -0.6;
+    group.add(fArm);
+    const armCircuit = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.3, 0.008), matE(0xd4a030, 0.5));
+    armCircuit.position.set(i * 0.32, 1.55, 0.075);
+    armCircuit.rotation.z = i * 0.2;
+    group.add(armCircuit);
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 6), mat(skinLight));
+    hand.position.set(i * 0.27, 1.02, 0.32);
+    group.add(hand);
+  }
+
+  for (let i = -1; i <= 1; i += 2) {
+    const uLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.45, 8), mat(0x6a7f6a));
+    uLeg.position.set(i * 0.12, 0.7, 0);
+    group.add(uLeg);
+    const lLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.065, 0.4, 8), mat(0x5a6f5a));
+    lLeg.position.set(i * 0.12, 0.2, 0);
+    group.add(lLeg);
+    const foot = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.15, 1, 1, 1), mat(0x4a5f4a));
+    foot.position.set(i * 0.12, 0.02, 0.03);
+    group.add(foot);
+  }
+
+  // Mass Effect-style backpack housing
+  const backpack = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.5, 0.15), mat(0x4a5f4a));
+  backpack.position.set(0, 1.4, -0.22);
+  group.add(backpack);
+  // Backpack frame ridges
+  for (let r = 0; r < 3; r++) {
+    const ridge = new THREE.Mesh(new THREE.BoxGeometry(0.37, 0.02, 0.02), mat(0x5a7a5a));
+    ridge.position.set(0, 1.2 + r * 0.2, -0.30);
+    group.add(ridge);
+  }
+  // Egg slots in backpack (2 closed)
+  for (let i = -1; i <= 1; i += 2) {
+    const slotEgg = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), mat(0xe8dcc8));
+    slotEgg.scale.set(1, 1.3, 1);
+    slotEgg.position.set(i * 0.1, 1.45, -0.30);
+    group.add(slotEgg);
+  }
+
+  // Deployed egg — unfolded Tomb Raider orb style
+  // Outer shell halves (split open)
+  const shellLeft = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8, 0, Math.PI), mat(0xe8dcc8));
+  shellLeft.position.set(-0.08, 0.95, 0.38);
+  shellLeft.rotation.y = -0.6;
+  shellLeft.rotation.z = 0.3;
+  group.add(shellLeft);
+  const shellRight = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8, 0, Math.PI), mat(0xe8dcc8));
+  shellRight.position.set(0.08, 0.95, 0.38);
+  shellRight.rotation.y = Math.PI + 0.6;
+  shellRight.rotation.z = -0.3;
+  group.add(shellRight);
+  // Inner orb — glowing energy core (Tomb Raider triangle of light vibes)
+  const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(0.09, 1), matE(0x22c55e, 1.0));
+  orb.position.set(0, 0.95, 0.38);
+  group.add(orb);
+  // Orbiting particles around deployed egg
+  for (let p = 0; p < 5; p++) {
+    const particle = new THREE.Mesh(new THREE.SphereGeometry(0.015, 6, 4), matE(0x22c55e, 0.7));
+    const a = (p / 5) * Math.PI * 2;
+    particle.position.set(Math.sin(a) * 0.18, 0.95 + Math.cos(a * 2) * 0.06, 0.38 + Math.cos(a) * 0.18);
+    group.add(particle);
+  }
+
+  // Ground eggs (undeployed, in carrying harness)
+  for (let i = 0; i < 2; i++) {
+    const e2 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 6), mat(0xd4c8b0));
+    e2.scale.set(1, 1.25, 1);
+    e2.position.set(-0.3 + i * 0.6, 0.1, 0.7);
+    group.add(e2);
+  }
+}
+
+// =========================================
+// CHARACTER 2: NANOFILAMENT SPINNER
+// =========================================
+function buildSpinner(group) {
+  const body = 0x2a2a3e;
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 8), mat(0x3a3a50));
+  head.position.y = 2.0;
+  group.add(head);
+  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.07, 0.06), matE(0x8b5cf6, 0.7));
+  visor.position.set(0, 1.97, 0.15);
+  group.add(visor);
+
+  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.15, 0.8, 8), mat(body));
+  torso.position.y = 1.35;
+  group.add(torso);
+
+  for (let i = -1; i <= 1; i += 2) {
+    const uArm = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.35, 8), mat(body));
+    uArm.position.set(i * 0.28, 1.5, 0);
+    uArm.rotation.z = i * 0.35;
+    group.add(uArm);
+    const fArm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.35, 8), mat(body));
+    fArm.position.set(i * 0.4, 1.1, 0.1);
+    fArm.rotation.z = i * 0.15;
+    fArm.rotation.x = -0.3;
+    group.add(fArm);
+    const spin = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 0.1, 8), matE(0x8b5cf6, 0.6));
+    spin.position.set(i * 0.42, 0.88, 0.12);
+    group.add(spin);
+    for (let f = -1; f <= 1; f++) {
+      const finger = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.1, 6), mat(0x4a4a60));
+      finger.position.set(i * 0.42 + f * 0.03, 0.78, 0.12);
+      group.add(finger);
+    }
+  }
+
+  const threadMat = new THREE.LineBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.45 });
+  const targets = [
+    [1.8, 2.8, 0.8], [-1.3, 2.2, -0.8], [1.0, 0.6, 1.8], [-1.8, 1.2, 1.3],
+    [0.5, 3.2, -1.2], [1.4, 0.3, -1.6], [-0.8, 2.8, 1.6], [1.8, 1.4, -0.8]
+  ];
+  for (const t of targets) {
+    const hand = Math.random() > 0.5 ? 1 : -1;
+    const pts = [new THREE.Vector3(hand * 0.42, 0.82, 0.12), new THREE.Vector3(t[0], t[1], t[2])];
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    group.add(new THREE.Line(geo, threadMat));
+    const bot = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.035, 0.035), matE(0xc084fc, 0.6));
+    bot.position.lerpVectors(pts[0], pts[1], 0.35 + Math.random() * 0.3);
+    group.add(bot);
+  }
+
+  // Belt with spools
+  const belt = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.025, 8, 16), mat(0x333350));
+  belt.position.y = 0.95;
+  belt.rotation.x = Math.PI / 2;
+  group.add(belt);
+  for (let a = 0; a < 6; a++) {
+    const angle = (a / 6) * Math.PI * 2;
+    const spool = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.05, 8), matE(0x8b5cf6, 0.5));
+    spool.position.set(Math.sin(angle) * 0.18, 0.95, Math.cos(angle) * 0.18);
+    spool.rotation.x = Math.PI / 2;
+    group.add(spool);
+  }
+
+  for (let i = -1; i <= 1; i += 2) {
+    const uLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.055, 0.45, 8), mat(0x222236));
+    uLeg.position.set(i * 0.1, 0.7, 0);
+    group.add(uLeg);
+    const lLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.05, 0.4, 8), mat(0x1e1e30));
+    lLeg.position.set(i * 0.1, 0.2, 0);
+    group.add(lLeg);
+    // Shoe spinners
+    const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.14), mat(0x1a1a2e));
+    shoe.position.set(i * 0.1, -0.02, 0.02);
+    group.add(shoe);
+    const shoeSpool = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.04, 8), matE(0x8b5cf6, 0.6));
+    shoeSpool.position.set(i * 0.1, -0.02, 0.1);
+    shoeSpool.rotation.x = Math.PI / 2;
+    group.add(shoeSpool);
+    // Foot threads — filaments trailing from shoe spools, anchored to the ground
+    const footOrigin = new THREE.Vector3(i * 0.1, -0.02, 0.1);
+    const footTargets = [
+      [i * 0.55, 0.001, 0.6], [i * -0.2, 0.001, 0.9], [i * 0.9, 0.001, -0.2],
+      [i * 0.35, 0.001, 1.3], [i * 1.1, 0.001, 0.5], [i * -0.45, 0.001, -0.1]
+    ];
+    for (const ft of footTargets) {
+      const fpts = [footOrigin.clone(), new THREE.Vector3(ft[0], ft[1], ft[2])];
+      const fgeo = new THREE.BufferGeometry().setFromPoints(fpts);
+      group.add(new THREE.Line(fgeo, threadMat));
+      const anchor = new THREE.Mesh(new THREE.SphereGeometry(0.012, 6, 4), matE(0xc084fc, 0.5));
+      anchor.position.set(ft[0], ft[1] + 0.006, ft[2]);
+      group.add(anchor);
+    }
+  }
+
+  const obj = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 0), mat(0x666680));
+  obj.position.set(1.1, 1.4, 0.7);
+  group.add(obj);
+  const objG = new THREE.Mesh(new THREE.OctahedronGeometry(0.09, 0), matE(0x8b5cf6, 0.5));
+  objG.position.copy(obj.position);
+  group.add(objG);
+}
+
+// =========================================
+// CHARACTER 3: THE LARPER (BARD)
+// =========================================
+function buildBard(group) {
+  const coat = 0x6b3a1a;
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.19, 10, 8), mat(0xc8a882));
+  head.position.y = 2.0;
+  group.add(head);
+  const mask = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.16, 0.06), matE(0xf97316, 0.6));
+  mask.position.set(0.06, 2.0, 0.16);
+  group.add(mask);
+  const eye = new THREE.Mesh(new THREE.SphereGeometry(0.025, 6, 4), matE(0xffffff, 0.5));
+  eye.position.set(0.07, 2.04, 0.2);
+  group.add(eye);
+  const eye2 = new THREE.Mesh(new THREE.SphereGeometry(0.02, 6, 4), mat(0x222222));
+  eye2.position.set(-0.07, 2.04, 0.16);
+  group.add(eye2);
+
+  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.18, 0.75, 8), mat(coat));
+  torso.position.y = 1.35;
+  group.add(torso);
+  const cape = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.8, 0.08), mat(0x4a2010));
+  cape.position.set(0, 1.3, -0.18);
+  group.add(cape);
+
+  const armR1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.35, 8), mat(coat));
+  armR1.position.set(0.35, 1.65, 0.05);
+  armR1.rotation.z = -0.9;
+  group.add(armR1);
+  const armR2 = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.3, 8), mat(coat));
+  armR2.position.set(0.55, 1.9, 0.05);
+  armR2.rotation.z = -0.3;
+  group.add(armR2);
+
+  const armL1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.3, 8), mat(coat));
+  armL1.position.set(-0.3, 1.3, 0.12);
+  armL1.rotation.z = 0.4;
+  group.add(armL1);
+  const armL2 = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.28, 8), mat(coat));
+  armL2.position.set(-0.42, 1.05, 0.18);
+  armL2.rotation.z = 0.2;
+  group.add(armL2);
+
+  const mic = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.2, 8), matE(0xf97316, 0.5));
+  mic.position.set(-0.45, 0.88, 0.22);
+  mic.rotation.z = 0.3;
+  group.add(mic);
+
+  for (let i = 1; i <= 4; i++) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(0.12 * i, 0.012, 8, 16),
+      matET(0xf97316, 0.5 / i, 0.5)
+    );
+    ring.position.set(0.65, 1.85, 0.25 + i * 0.25);
+    group.add(ring);
+  }
+
+  for (let i = -1; i <= 1; i += 2) {
+    const uLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.065, 0.4, 8), mat(0x3a2010));
+    uLeg.position.set(i * 0.11, 0.7, 0);
+    group.add(uLeg);
+    const lLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.06, 0.38, 8), mat(0x3a2010));
+    lLeg.position.set(i * 0.11, 0.22, 0);
+    group.add(lLeg);
+    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.16), mat(0x2a1808));
+    boot.position.set(i * 0.11, 0.04, 0.02);
+    group.add(boot);
+  }
+
+  const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.06, 8), mat(0x3a2a18));
+  belt.position.set(0, 0.95, 0);
+  group.add(belt);
+  for (let i = -1; i <= 1; i++) {
+    const pouch = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.08, 0.06), mat(0x4a3020));
+    pouch.position.set(i * 0.18, 0.92, 0.18);
+    group.add(pouch);
+  }
+
+  // Divination props
+  // D20 die on belt
+  const d20 = new THREE.Mesh(new THREE.IcosahedronGeometry(0.05, 0), matE(0xf97316, 0.7));
+  d20.position.set(0.25, 0.92, 0.15);
+  d20.rotation.set(0.3, 0.7, 0.2);
+  group.add(d20);
+
+  // Tarot card (held in left hand — flat rectangle)
+  const card = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.005), mat(0xf5e6c8));
+  card.position.set(-0.45, 0.85, 0.25);
+  card.rotation.set(0.1, 0.3, 0.15);
+  group.add(card);
+  // Card face marking (star/pentacle)
+  const cardStar = new THREE.Mesh(new THREE.CircleGeometry(0.025, 5), matE(0xf97316, 0.8));
+  cardStar.position.set(-0.45, 0.86, 0.258);
+  cardStar.rotation.set(0.1, 0.3, 0.15);
+  group.add(cardStar);
+
+  // Floating numerology glyphs orbiting
+  const glyphMat = matET(0xf97316, 0.4, 0.6);
+  for (let g = 0; g < 5; g++) {
+    const angle = (g / 5) * Math.PI * 2;
+    const glyph = new THREE.Mesh(new THREE.OctahedronGeometry(0.03, 0), glyphMat);
+    glyph.position.set(
+      Math.sin(angle) * 0.7,
+      1.5 + Math.sin(angle * 3) * 0.3,
+      Math.cos(angle) * 0.7
+    );
+    group.add(glyph);
+  }
+
+  // Scattered dice on ground
+  const d6 = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.045, 0.045), matE(0xf5e6c8, 0.6));
+  d6.position.set(0.3, 0.03, 0.5);
+  d6.rotation.set(0.4, 0.8, 0.2);
+  group.add(d6);
+  const d8 = new THREE.Mesh(new THREE.OctahedronGeometry(0.035, 0), matE(0xf97316, 0.5));
+  d8.position.set(-0.25, 0.04, 0.6);
+  d8.rotation.set(0.6, 0.3, 0.5);
+  group.add(d8);
+}
+
+// =========================================
+// CHARACTER 4: JUNGIAN TECH-CLERIC
+// =========================================
+function buildCleric(group) {
+  const robeColor = 0x1a3040;
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 8), mat(0x8098a8));
+  head.position.y = 2.05;
+  group.add(head);
+  for (let i = -1; i <= 1; i += 2) {
+    const eLine = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.012, 0.02), mat(0x334455));
+    eLine.position.set(i * 0.07, 2.06, 0.15);
+    group.add(eLine);
+  }
+  const thirdEye = new THREE.Mesh(new THREE.OctahedronGeometry(0.04, 0), matE(0x06b6d4, 0.7));
+  thirdEye.position.set(0, 2.15, 0.15);
+  group.add(thirdEye);
+
+  const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.4, 1.2, 8), mat(robeColor));
+  robe.position.y = 0.6;
+  group.add(robe);
+  const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.2, 0.5, 8), mat(robeColor));
+  upper.position.y = 1.5;
+  group.add(upper);
+
+  for (let i = 0; i < 3; i++) {
+    const halo = new THREE.Mesh(
+      new THREE.TorusGeometry(0.32 + i * 0.07, 0.01, 8, 20),
+      matET(0x06b6d4, 0.6 - i * 0.12, 0.6)
+    );
+    halo.position.y = 2.3;
+    halo.rotation.x = Math.PI / 2 + i * 0.25;
+    halo.rotation.z = i * 0.6;
+    group.add(halo);
+  }
+
+  for (let i = -1; i <= 1; i += 2) {
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.45, 8), mat(robeColor));
+    arm.position.set(i * 0.3, 1.25, 0.12);
+    arm.rotation.z = i * 0.5;
+    arm.rotation.x = -0.4;
+    group.add(arm);
+  }
+  const hands = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), mat(0x8098a8));
+  hands.position.set(0, 1.0, 0.32);
+  group.add(hands);
+
+  const aColors = [0x06b6d4, 0xf97316, 0x22c55e, 0xef4444];
+  const aGeos = [
+    new THREE.BoxGeometry(0.1, 0.1, 0.1),
+    new THREE.ConeGeometry(0.07, 0.13, 6),
+    new THREE.OctahedronGeometry(0.07, 0),
+    new THREE.TetrahedronGeometry(0.08, 0)
+  ];
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI * 2;
+    const r = 0.9;
+    const sym = new THREE.Mesh(aGeos[i], matE(aColors[i], 0.5));
+    sym.position.set(Math.cos(angle) * r, 1.5 + Math.sin(i * 1.7) * 0.25, Math.sin(angle) * r);
+    group.add(sym);
+    const lMat = new THREE.LineBasicMaterial({ color: aColors[i], transparent: true, opacity: 0.3 });
+    const lGeo = new THREE.BufferGeometry().setFromPoints([
+      sym.position.clone(), new THREE.Vector3(0, 1.5, 0)
+    ]);
+    group.add(new THREE.Line(lGeo, lMat));
+  }
+
+  const trim = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.015, 8, 16), matE(0x06b6d4, 0.4));
+  trim.position.y = 0.02;
+  trim.rotation.x = Math.PI / 2;
+  group.add(trim);
+}
+
+// =========================================
+// CHARACTER 5: THE LUDDITE
+// =========================================
+function buildLithic(group) {
+  // Brutalist industrial: carbon-fibre dark metal, exposed pistons, reactor glow
+  const carbon = 0x2a2a30;      // dark carbon-fibre body
+  const plate = 0x3c3c44;       // armor plate
+  const steel = 0x55555c;       // lighter steel detailing
+  const piston = 0x7a7a82;      // exposed hydraulic metal
+  const emberCore = 0xff4500;   // reactor orange
+  const hazard = 0xffaa00;      // hazard amber
+
+  // HEAD — angular helm with horizontal visor slit (40K Space Marine / Mass Effect vibe)
+  const helm = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.28, 0.3), mat(carbon));
+  helm.position.y = 1.85;
+  group.add(helm);
+  // Forehead bevel plate
+  const brow = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.08, 0.04), mat(steel));
+  brow.position.set(0, 1.95, 0.15);
+  group.add(brow);
+  // Visor slit — glowing amber horizontal band
+  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.04, 0.02), matE(hazard, 0.95));
+  visor.position.set(0, 1.86, 0.16);
+  group.add(visor);
+  // Jaw plate / respirator
+  const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.24), mat(plate));
+  jaw.position.set(0, 1.74, 0.02);
+  group.add(jaw);
+  // Respirator vents
+  for (let i = -1; i <= 1; i += 2) {
+    const vent = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.04, 6), mat(0x111113));
+    vent.position.set(i * 0.06, 1.72, 0.13);
+    vent.rotation.x = Math.PI / 2;
+    group.add(vent);
+  }
+  // Neck actuator
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.08, 6), mat(piston));
+  neck.position.y = 1.66;
+  group.add(neck);
+
+  // TORSO — stacked armor plates
+  const chest = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.42, 0.4), mat(plate));
+  chest.position.y = 1.42;
+  group.add(chest);
+  // Pauldron-style shoulder caps
+  for (let i = -1; i <= 1; i += 2) {
+    const pauldron = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.32), mat(carbon));
+    pauldron.position.set(i * 0.4, 1.52, 0);
+    pauldron.rotation.z = i * 0.15;
+    group.add(pauldron);
+    // Pauldron trim
+    const trim = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.03, 0.34), matE(emberCore, 0.5));
+    trim.position.set(i * 0.4, 1.4, 0);
+    trim.rotation.z = i * 0.15;
+    group.add(trim);
+  }
+  // Reactor core sternum
+  const reactorHousing = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.06), mat(0x15151a));
+  reactorHousing.position.set(0, 1.44, 0.21);
+  group.add(reactorHousing);
+  const reactor = new THREE.Mesh(new THREE.SphereGeometry(0.065, 10, 8), matE(emberCore, 1.0));
+  reactor.position.set(0, 1.44, 0.24);
+  group.add(reactor);
+  // Panel lines — horizontal armor seams
+  for (let i = 0; i < 3; i++) {
+    const seam = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.008, 0.42), mat(0x15151a));
+    seam.position.set(0, 1.58 - i * 0.14, 0);
+    group.add(seam);
+  }
+  // Abdomen — exposed carbon-fibre ribs with piston channels
+  const abdo = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.24, 0.32), mat(carbon));
+  abdo.position.y = 1.12;
+  group.add(abdo);
+  for (let i = 0; i < 3; i++) {
+    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.02, 0.34), mat(steel));
+    rib.position.set(0, 1.22 - i * 0.08, 0);
+    group.add(rib);
+  }
+  // Hazard chevron on chest
+  const chevron = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.03, 0.01), matE(hazard, 0.7));
+  chevron.position.set(0, 1.3, 0.21);
+  group.add(chevron);
+
+  // ARMS — armored upper, exposed piston forearm, heavy gauntlet
+  for (let i = -1; i <= 1; i += 2) {
+    // Upper arm armor
+    const uArm = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.34, 0.18), mat(plate));
+    uArm.position.set(i * 0.44, 1.28, 0);
+    uArm.rotation.z = i * 0.08;
+    group.add(uArm);
+    // Elbow joint — exposed hydraulic
+    const elbow = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.16, 8), mat(piston));
+    elbow.position.set(i * 0.46, 1.08, 0);
+    elbow.rotation.z = Math.PI / 2;
+    group.add(elbow);
+    // Forearm — angular armor over piston
+    const fArmCore = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.3, 6), mat(piston));
+    fArmCore.position.set(i * 0.46, 0.92, 0);
+    group.add(fArmCore);
+    const fArmPlate = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.14), mat(carbon));
+    fArmPlate.position.set(i * 0.46, 0.92, 0.02);
+    group.add(fArmPlate);
+    // Forearm amber strip
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.22, 0.15), matE(emberCore, 0.6));
+    stripe.position.set(i * 0.53, 0.92, 0);
+    group.add(stripe);
+    // Gauntlet/fist — heavy block
+    const fist = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.2), mat(plate));
+    fist.position.set(i * 0.46, 0.72, 0);
+    group.add(fist);
+    // Knuckle plates
+    const knuckle = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.04, 0.04), mat(steel));
+    knuckle.position.set(i * 0.46, 0.78, 0.11);
+    group.add(knuckle);
+  }
+
+  // LEGS — heavy greaves, thigh piston, armored boot
+  for (let i = -1; i <= 1; i += 2) {
+    // Hip block
+    const hip = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.14, 0.26), mat(carbon));
+    hip.position.set(i * 0.16, 0.94, 0);
+    group.add(hip);
+    // Thigh armor
+    const thigh = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.38, 0.22), mat(plate));
+    thigh.position.set(i * 0.16, 0.72, 0);
+    group.add(thigh);
+    // Exposed thigh piston (rear)
+    const tPiston = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.32, 6), mat(piston));
+    tPiston.position.set(i * 0.16, 0.72, -0.14);
+    group.add(tPiston);
+    // Knee — angular cap
+    const knee = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.12, 0.22), mat(steel));
+    knee.position.set(i * 0.16, 0.5, 0.02);
+    group.add(knee);
+    const kneeGlow = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.03, 0.03), matE(emberCore, 0.7));
+    kneeGlow.position.set(i * 0.16, 0.52, 0.13);
+    group.add(kneeGlow);
+    // Shin greave
+    const shin = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.36, 0.2), mat(carbon));
+    shin.position.set(i * 0.16, 0.28, 0);
+    group.add(shin);
+    // Shin amber stripe
+    const sStripe = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.22, 0.02), matE(hazard, 0.5));
+    sStripe.position.set(i * 0.16, 0.28, 0.11);
+    group.add(sStripe);
+    // Heavy boot
+    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.1, 0.3), mat(plate));
+    boot.position.set(i * 0.16, 0.05, 0.04);
+    group.add(boot);
+    // Toe cap
+    const toe = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.06, 0.08), mat(steel));
+    toe.position.set(i * 0.16, 0.03, 0.19);
+    group.add(toe);
+  }
+
+  // Back exhaust stacks — twin vents
+  for (let i = -1; i <= 1; i += 2) {
+    const stack = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 0.22, 6), mat(0x1a1a1e));
+    stack.position.set(i * 0.16, 1.66, -0.18);
+    group.add(stack);
+    const stackGlow = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.02, 6), matE(emberCore, 0.9));
+    stackGlow.position.set(i * 0.16, 1.78, -0.18);
+    group.add(stackGlow);
+  }
+
+  // Floor debris — industrial bolts / plate fragments instead of cracks
+  const boltPositions = [[-0.55, 0.3], [-0.2, 0.5], [0.3, 0.35], [0.55, 0.55], [-0.35, -0.15]];
+  for (const [x, z] of boltPositions) {
+    const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.015, 6), mat(steel));
+    bolt.position.set(x, 0.008, z);
+    group.add(bolt);
+  }
+  // Scorched floor plate
+  const scorch = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.005, 0.5), matE(emberCore, 0.08));
+  scorch.position.set(0, 0.006, 0.1);
+  group.add(scorch);
+
+  group.position.y = -0.1;
+}
+
+// =========================================
+// CHARACTER 6: THE CENSORATE (EDITOR)
+// =========================================
+function buildCensorate(group) {
+  const bodyColor = 0xc0c0c8;
+  const accent = 0x3b82f6;
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.17, 10, 8), mat(bodyColor));
+  head.position.y = 2.05;
+  head.scale.set(1, 1.25, 0.95);
+  group.add(head);
+  const faceLine = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.008, 0.01), mat(0x9999a0));
+  faceLine.position.set(0, 2.07, 0.15);
+  group.add(faceLine);
+
+  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.16, 0.85, 8), mat(bodyColor));
+  torso.position.y = 1.35;
+  group.add(torso);
+
+  for (let i = -1; i <= 1; i += 2) {
+    const device = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.08), matE(accent, 0.6));
+    device.position.set(i * 0.22, 1.78, 0);
+    group.add(device);
+    const lens = new THREE.Mesh(new THREE.SphereGeometry(0.018, 6, 4), matE(accent, 0.9));
+    lens.position.set(i * 0.22, 1.78, 0.045);
+    group.add(lens);
+  }
+
+  for (let i = -1; i <= 1; i += 2) {
+    const uArm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.38, 8), mat(bodyColor));
+    uArm.position.set(i * 0.25, 1.5, 0);
+    uArm.rotation.z = i * 0.08;
+    group.add(uArm);
+    const fArm = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.35, 8), mat(bodyColor));
+    fArm.position.set(i * 0.26, 1.1, 0);
+    group.add(fArm);
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), mat(0xb0b0b8));
+    hand.position.set(i * 0.26, 0.9, 0);
+    group.add(hand);
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.025, 8), matE(accent, 0.4));
+    band.position.set(i * 0.26, 1.28, 0);
+    group.add(band);
+  }
+
+  for (let i = -1; i <= 1; i += 2) {
+    const uLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.055, 0.45, 8), mat(0xa8a8b0));
+    uLeg.position.set(i * 0.1, 0.68, 0);
+    group.add(uLeg);
+    const lLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.05, 0.4, 8), mat(0xa0a0a8));
+    lLeg.position.set(i * 0.1, 0.22, 0);
+    group.add(lLeg);
+    const foot = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.12), mat(0x9898a0));
+    foot.position.set(i * 0.1, 0.02, 0.02);
+    group.add(foot);
+  }
+
+  const centerLine = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.7, 0.01), matE(accent, 0.35));
+  centerLine.position.set(0, 1.35, 0.17);
+  group.add(centerLine);
+
+  for (let i = 0; i < 3; i++) {
+    const angle = (i / 3) * Math.PI * 2;
+    const drone = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.04), matE(accent, 0.5));
+    drone.position.set(Math.cos(angle) * 0.6, 2.3 + Math.sin(i * 2) * 0.15, Math.sin(angle) * 0.6);
+    group.add(drone);
+    const dMat = new THREE.LineBasicMaterial({ color: accent, transparent: true, opacity: 0.2 });
+    const dGeo = new THREE.BufferGeometry().setFromPoints([
+      drone.position.clone(), new THREE.Vector3(0, 2.05, 0)
+    ]);
+    group.add(new THREE.Line(dGeo, dMat));
+  }
+}
+
+// INIT ALL
+createScene(document.getElementById('p0'), buildBioforge, 0x113311);
+createScene(document.getElementById('p1'), buildSpinner, 0x111133);
+createScene(document.getElementById('p2'), buildBard, 0x331a0a);
+createScene(document.getElementById('p3'), buildCleric, 0x0a2233);
+createScene(document.getElementById('p4'), buildLithic, 0x1a1a1a);
+createScene(document.getElementById('p5'), buildCensorate, 0x0a1020);
+</script>
+</body>
+</html>
