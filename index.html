@@ -45,6 +45,19 @@ body::after{
   position:relative;z-index:1;
   animation:glow 4s ease-in-out infinite alternate;
 }
+.logo-text .tm{
+  font-family:'Orbitron',monospace;font-weight:400;
+  font-size:0.26em;letter-spacing:0;
+  vertical-align:0.9em;margin-left:0.12em;
+  -webkit-text-fill-color:#f97316;
+  color:#f97316;
+  background:none;
+  -webkit-background-clip:initial;background-clip:initial;
+  text-shadow:none;
+  animation:none;
+  display:inline-block;
+  opacity:0.85;
+}
 @keyframes glow{
   0%{filter:brightness(1) drop-shadow(0 0 20px #f9731630)}
   100%{filter:brightness(1.15) drop-shadow(0 0 40px #f9731650)}
@@ -133,7 +146,7 @@ body::after{
 
 <!-- HERO -->
 <section class="hero">
-  <div class="logo-text">Frankenstengine</div>
+  <div class="logo-text">Frankenstengine<span class="tm">&trade;</span></div>
   <div class="coming-soon">Coming Soon</div>
   <p class="tagline">FTUX Focused Gamified Game Engine</p>
   <div class="scroll-hint">&#9660; Meet the Factions &#9660;</div>
@@ -236,6 +249,9 @@ body::after{
 
 <!-- FOOTER -->
 <footer class="footer">
+  <p style="margin-bottom:1.2rem">
+    <a href="/lab/" style="font-family:'Orbitron',monospace;font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:#f97316;border:1px solid #f9731640;padding:0.5em 1.4em;border-radius:3px;text-decoration:none;display:inline-block;">&rarr; The Lab</a>
+  </p>
   <p>&copy; 2026 DTR Labs Ltd. All rights reserved. All characters, lore, and game designs are original works.</p>
   <p style="margin-top:0.6rem">&copy; 2026 Jonathan Hobman / Frankenstengine. All rights reserved.</p>
 </footer>
