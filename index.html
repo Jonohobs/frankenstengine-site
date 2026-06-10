@@ -45,6 +45,19 @@ body::after{
   position:relative;z-index:1;
   animation:glow 4s ease-in-out infinite alternate;
 }
+.logo-text .tm{
+  font-family:'Orbitron',monospace;font-weight:400;
+  font-size:0.26em;letter-spacing:0;
+  vertical-align:0.9em;margin-left:0.12em;
+  -webkit-text-fill-color:#f97316;
+  color:#f97316;
+  background:none;
+  -webkit-background-clip:initial;background-clip:initial;
+  text-shadow:none;
+  animation:none;
+  display:inline-block;
+  opacity:0.85;
+}
 @keyframes glow{
   0%{filter:brightness(1) drop-shadow(0 0 20px #f9731630)}
   100%{filter:brightness(1.15) drop-shadow(0 0 40px #f9731650)}
@@ -133,7 +146,7 @@ body::after{
 
 <!-- HERO -->
 <section class="hero">
-  <div class="logo-text">Frankenstengine</div>
+  <div class="logo-text">Frankenstengine<span class="tm">&trade;</span></div>
   <div class="coming-soon">Coming Soon</div>
   <p class="tagline">FTUX Focused Gamified Game Engine</p>
   <div class="scroll-hint">&#9660; Meet the Factions &#9660;</div>
@@ -195,6 +208,38 @@ body::after{
   </div>
 </section>
 
+<!-- OPEN BUILDS -->
+<section class="factions-section" id="builds">
+  <div class="section-title">Open Builds</div>
+  <div class="section-subtitle" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#888;letter-spacing:0.08em;margin-top:-0.5rem;margin-bottom:1.5rem;text-transform:uppercase;">[ stitched from open source &middot; runs in your browser ]</div>
+  <div class="gallery">
+    <div class="panel" id="p6">
+      <div class="scanline"></div><div class="crt"></div>
+      <div class="label">
+        <div class="class" style="color:#22c55e">Hybrid Genre</div>
+        <h2 style="color:#22c55e">Command &amp; Trigger</h2>
+        <p>An FPS and an RTS in one build. Marshal squads from overhead, then drop into a soldier's scope. Open-source genre mashup.</p>
+      </div>
+    </div>
+    <div class="panel" id="p7">
+      <div class="scanline"></div><div class="crt"></div>
+      <div class="label">
+        <div class="class" style="color:#06b6d4">Reaction Sandbox</div>
+        <h2 style="color:#06b6d4">Bonds &amp; Beakers</h2>
+        <p>Games built around real chemistry. Snap atoms into molecules, trigger reactions, watch electron shells light up.</p>
+      </div>
+    </div>
+    <div class="panel" id="p8">
+      <div class="scanline"></div><div class="crt"></div>
+      <div class="label">
+        <div class="class" style="color:#8b5cf6">Materials Lab</div>
+        <h2 style="color:#8b5cf6">Lattice Forge</h2>
+        <p>Materials tech as play. Grow crystal lattices, stress unit cells, feel how structure becomes strength.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- PHILOSOPHY: DON'T BUILD THE MONSTER -->
 <section class="warning-section" style="padding:4rem 1.5rem;max-width:760px;margin:0 auto;">
   <div class="section-title" style="color:#ef4444;margin-bottom:1.5rem;">&#9888; Don't Build the Monster</div>
@@ -236,6 +281,9 @@ body::after{
 
 <!-- FOOTER -->
 <footer class="footer">
+  <p style="margin-bottom:1.2rem">
+    <a href="/lab/" style="font-family:'Orbitron',monospace;font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:#f97316;border:1px solid #f9731640;padding:0.5em 1.4em;border-radius:3px;text-decoration:none;display:inline-block;">&rarr; The Lab</a>
+  </p>
   <p>&copy; 2026 DTR Labs Ltd. All rights reserved. All characters, lore, and game designs are original works.</p>
   <p style="margin-top:0.6rem">&copy; 2026 Jonathan Hobman / Frankenstengine. All rights reserved.</p>
 </footer>
@@ -346,6 +394,117 @@ function createScene(container, buildFn, bgTint) {
   ro.observe(container);
 }
 
+// Dreams-style scene factory — toon ramp, purple ground, warm sun, stardust
+function createDreamsScene(container, buildFn) {
+  const w = container.clientWidth, h = container.clientHeight;
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x14112e, 0.045);
+
+  const camera = new THREE.PerspectiveCamera(48, w / h, 0.1, 80);
+  camera.position.set(0, 2.2, 5.5);
+  camera.lookAt(0, 0.8, 0);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(1);
+  renderer.setSize(w, h);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.insertBefore(renderer.domElement, container.firstChild);
+
+  // 3-step toon ramp (GBG plastic-toy look)
+  const ramp = new Uint8Array([90, 170, 255]);
+  const toonGrad = new THREE.DataTexture(ramp, 3, 1, THREE.RedFormat);
+  toonGrad.minFilter = toonGrad.magFilter = THREE.NearestFilter;
+  toonGrad.needsUpdate = true;
+
+  // Lights: warm sun + purple hemisphere
+  const sun = new THREE.DirectionalLight(0xfff1dd, 1.6);
+  sun.position.set(5, 10, 5);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(512, 512);
+  sun.shadow.camera.left = sun.shadow.camera.bottom = -10;
+  sun.shadow.camera.right = sun.shadow.camera.top = 10;
+  sun.shadow.bias = -0.0004;
+  scene.add(sun);
+  scene.add(new THREE.HemisphereLight(0x8a8fff, 0x33214b, 0.85));
+
+  // Purple ground disc
+  const ground = new THREE.Mesh(
+    new THREE.CircleGeometry(12, 48),
+    new THREE.MeshToonMaterial({ color: 0x241f50, gradientMap: toonGrad })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  const grid = new THREE.GridHelper(24, 24, 0x4a4490, 0x322c68);
+  grid.material.transparent = true;
+  grid.material.opacity = 0.35;
+  grid.position.y = 0.01;
+  scene.add(grid);
+
+  // Drifting sparkles
+  const N = 180;
+  const sPos = new Float32Array(N * 3);
+  const sVel = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    sPos[i*3]   = (Math.random()-0.5)*18;
+    sPos[i*3+1] = Math.random()*12+0.5;
+    sPos[i*3+2] = (Math.random()-0.5)*18;
+    sVel[i] = 0.2 + Math.random()*0.4;
+  }
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
+  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({
+    color: 0xbfb8ff, size: 0.08, transparent: true, opacity: 0.7,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  scene.add(stars);
+
+  // Build content
+  const group = new THREE.Group();
+  scene.add(group);
+  buildFn(group, toonGrad);
+
+  // Drag to rotate
+  let isDragging = false, prevX = 0, rotY = 0;
+  container.addEventListener('mousedown', e => { isDragging = true; prevX = e.clientX; });
+  container.addEventListener('mousemove', e => { if (!isDragging) return; rotY += (e.clientX-prevX)*0.01; prevX = e.clientX; });
+  container.addEventListener('mouseup', () => isDragging = false);
+  container.addEventListener('mouseleave', () => isDragging = false);
+  container.addEventListener('touchstart', e => { isDragging=true; prevX=e.touches[0].clientX; }, {passive:true});
+  container.addEventListener('touchmove', e => { if(!isDragging)return; rotY+=(e.touches[0].clientX-prevX)*0.01; prevX=e.touches[0].clientX; }, {passive:true});
+  container.addEventListener('touchend', () => isDragging = false);
+
+  let isVisible = false;
+  new IntersectionObserver(entries => { isVisible = entries[0].isIntersecting; }, {threshold:0.1}).observe(container);
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!isVisible) return;
+    if (!isDragging) rotY += 0.004;
+    group.rotation.y = rotY;
+    // Sparkle drift
+    const pos = starGeo.attributes.position;
+    const t = performance.now() * 0.0003;
+    for (let i = 0; i < N; i++) {
+      pos.array[i*3+1] -= sVel[i] * 0.003;
+      if (pos.array[i*3+1] < 0.3) pos.array[i*3+1] = 12 + Math.random()*2;
+    }
+    pos.needsUpdate = true;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  new ResizeObserver(() => {
+    const nw = container.clientWidth, nh = container.clientHeight;
+    if (nw===0||nh===0) return;
+    camera.aspect = nw/nh;
+    camera.updateProjectionMatrix();
+    renderer.setSize(nw, nh);
+  }).observe(container);
+}
+
 // PS2 materials
 function mat(color) {
   return new THREE.MeshPhongMaterial({ color, flatShading: true });
@@ -355,6 +514,23 @@ function matE(color, intensity) {
 }
 function matET(color, opacity, intensity) {
   return new THREE.MeshPhongMaterial({ color, flatShading: true, emissive: color, emissiveIntensity: intensity || 0.4, transparent: true, opacity });
+}
+// Toon material factory (receives gradient from createDreamsScene)
+function toonMat(color, grad) {
+  return new THREE.MeshToonMaterial({ color, gradientMap: grad });
+}
+function toonMatE(color, grad) {
+  return new THREE.MeshToonMaterial({ color, gradientMap: grad, emissive: color, emissiveIntensity: 0.3 });
+}
+
+// Connect two points with a cylinder (bond / strut)
+function connect(group, a, b, radius, material) {
+  const dir = new THREE.Vector3().subVectors(b, a);
+  const len = dir.length();
+  const cyl = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, len, 8), material);
+  cyl.position.copy(a).add(b).multiplyScalar(0.5);
+  cyl.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+  group.add(cyl);
 }
 
 // =========================================
@@ -1024,6 +1200,132 @@ function buildCensorate(group) {
   }
 }
 
+// =========================================
+// OPEN BUILD 1: FPS / RTS HYBRID
+// =========================================
+function buildFpsRts(group, grad) {
+  const ally = 0x22c55e, enemy = 0xef4444;
+  const aM = () => toonMat(ally, grad);
+  const eM = () => toonMat(enemy, grad);
+
+  // Selection box around allied squad
+  const x0 = -0.7, x1 = 0.0, z0 = -0.78, z1 = -0.05;
+  function selBar(x, z, w, d) {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(w, 0.012, d), toonMatE(ally, grad));
+    b.position.set(x, 0.02, z);
+    group.add(b);
+  }
+  selBar((x0+x1)/2, z0, x1-x0, 0.025);
+  selBar((x0+x1)/2, z1, x1-x0, 0.025);
+  selBar(x0, (z0+z1)/2, 0.025, z1-z0);
+  selBar(x1, (z0+z1)/2, 0.025, z1-z0);
+
+  // Allied units (toon cones + rings)
+  for (const [x, z] of [[-0.52,-0.55],[-0.18,-0.4],[-0.5,-0.18],[-0.15,-0.65]]) {
+    const u = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.32, 8), aM());
+    u.position.set(x, 0.16, z); u.castShadow = true; group.add(u);
+    const r = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.012, 6, 16), toonMatE(ally, grad));
+    r.position.set(x, 0.02, z); r.rotation.x = Math.PI/2; group.add(r);
+  }
+  // Enemy units
+  for (const [x, z] of [[0.6,0.45],[0.85,0.1],[0.5,0.72]]) {
+    const u = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.32, 8), eM());
+    u.position.set(x, 0.16, z); u.castShadow = true; group.add(u);
+    const r = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.012, 6, 16), toonMatE(enemy, grad));
+    r.position.set(x, 0.02, z); r.rotation.x = Math.PI/2; group.add(r);
+  }
+
+  // Floating FPS reticle
+  const ret = new THREE.Group();
+  ret.position.set(0.15, 1.5, 0.3);
+  ret.add(new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.02, 8, 32), toonMatE(ally, grad)));
+  for (let k = 0; k < 4; k++) {
+    const a = k * Math.PI / 2;
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.14, 0.02), toonMatE(ally, grad));
+    bar.position.set(Math.cos(a)*0.4, Math.sin(a)*0.4, 0);
+    ret.add(bar);
+  }
+  ret.add(new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 6), toonMatE(ally, grad)));
+  group.add(ret);
+}
+
+// =========================================
+// OPEN BUILD 2: CHEMISTRY SANDBOX
+// =========================================
+function buildChemistry(group, grad) {
+  const carbon = 0x4a4f6e, oxy = 0xef4444, hyd = 0xdfe4ee, bond = 0x06b6d4;
+  const bM = () => toonMatE(bond, grad);
+  const cy = 1.0, R = 0.5;
+
+  const ring = [];
+  for (let i = 0; i < 6; i++) {
+    const a = i / 6 * Math.PI * 2;
+    const p = new THREE.Vector3(Math.cos(a)*R, cy+Math.sin(a)*R*0.35, Math.sin(a)*R*0.7);
+    ring.push(p);
+    const atom = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 12), toonMat(carbon, grad));
+    atom.position.copy(p); atom.castShadow = true; group.add(atom);
+  }
+  for (let i = 0; i < 6; i++) connect(group, ring[i], ring[(i+1)%6], 0.035, bM());
+
+  const o = new THREE.Vector3(0, cy+0.72, 0.18);
+  const oA = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), toonMat(oxy, grad));
+  oA.position.copy(o); oA.castShadow = true; group.add(oA);
+  connect(group, ring[0], o, 0.035, bM());
+
+  const h = new THREE.Vector3(0, cy-0.72, -0.1);
+  const hA = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 10), toonMat(hyd, grad));
+  hA.position.copy(h); hA.castShadow = true; group.add(hA);
+  connect(group, ring[3], h, 0.03, bM());
+
+  // Orbiting electron dots
+  for (let e = 0; e < 8; e++) {
+    const a = e / 8 * Math.PI * 2;
+    const el = new THREE.Mesh(new THREE.SphereGeometry(0.025, 6, 4), toonMatE(bond, grad));
+    el.position.set(Math.cos(a)*0.85, cy+Math.sin(a*2)*0.2, Math.sin(a)*0.85);
+    group.add(el);
+  }
+  const shell = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.006, 6, 40), matET(bond, 0.25, 0.4));
+  shell.position.y = cy; shell.rotation.x = Math.PI/2.4;
+  group.add(shell);
+}
+
+// =========================================
+// OPEN BUILD 3: MATERIALS LAB (CRYSTAL LATTICE)
+// =========================================
+function buildMaterials(group, grad) {
+  const node = 0x9775fa, strut = 0x7c3aed, frame = 0xc4b5fd;
+  const sM = () => toonMatE(strut, grad);
+  const cy = 1.0, a = 0.48;
+
+  // BCC unit cell corners
+  const corners = [];
+  for (const sx of [-1,1]) for (const sy of [-1,1]) for (const sz of [-1,1]) {
+    corners.push(new THREE.Vector3(sx*a, cy+sy*a, sz*a));
+  }
+  for (const c of corners) {
+    const s = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), toonMat(node, grad));
+    s.position.copy(c); s.castShadow = true; group.add(s);
+  }
+
+  // Body-centre atom
+  const center = new THREE.Vector3(0, cy, 0);
+  const cs = new THREE.Mesh(new THREE.IcosahedronGeometry(0.14, 1), toonMatE(node, grad));
+  cs.position.copy(center); cs.castShadow = true; group.add(cs);
+
+  // Cube edges
+  for (let i = 0; i < corners.length; i++)
+    for (let j = i+1; j < corners.length; j++)
+      if (Math.abs(corners[i].distanceTo(corners[j]) - 2*a) < 0.001)
+        connect(group, corners[i], corners[j], 0.025, sM());
+
+  // Body-centre bonds
+  for (const c of corners) connect(group, center, c, 0.015, matET(frame, 0.45, 0.4));
+
+  // Translucent shell
+  const shell = new THREE.Mesh(new THREE.BoxGeometry(a*2+0.05, a*2+0.05, a*2+0.05), matET(node, 0.07, 0.15));
+  shell.position.y = cy; group.add(shell);
+}
+
 // INIT ALL
 createScene(document.getElementById('p0'), buildBioforge, 0x113311);
 createScene(document.getElementById('p1'), buildSpinner, 0x111133);
@@ -1031,6 +1333,9 @@ createScene(document.getElementById('p2'), buildBard, 0x331a0a);
 createScene(document.getElementById('p3'), buildCleric, 0x0a2233);
 createScene(document.getElementById('p4'), buildLithic, 0x1a1a1a);
 createScene(document.getElementById('p5'), buildCensorate, 0x0a1020);
+createDreamsScene(document.getElementById('p6'), buildFpsRts);
+createDreamsScene(document.getElementById('p7'), buildChemistry);
+createDreamsScene(document.getElementById('p8'), buildMaterials);
 </script>
 </body>
 </html>
