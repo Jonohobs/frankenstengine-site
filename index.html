@@ -74,6 +74,23 @@ body::after{
 }
 @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
 
+/* ===== NEW USER NOTE ===== */
+.agent-note{
+  padding:3rem 1rem;background:linear-gradient(180deg,#080811 0%,#0d0a14 100%);
+  border-top:1px solid #1a1a2e;border-bottom:1px solid #1a1a2e;
+}
+.agent-note-card{
+  max-width:940px;margin:0 auto;display:grid;grid-template-columns:150px 1fr;gap:1.5rem;align-items:center;
+  border:1px solid #f9731630;background:#0a0a14;padding:1.3rem;box-shadow:0 0 45px #f973160e;
+}
+.agent-clawd{width:140px;height:140px;margin:auto;filter:drop-shadow(0 0 24px #f9731625)}
+.agent-note h2{font-family:'Orbitron',monospace;font-size:clamp(0.95rem,2.3vw,1.25rem);letter-spacing:0.13em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
+.agent-note p{font-size:0.78rem;color:#888;line-height:1.75;margin-bottom:0.9rem}
+.agent-steps{display:grid;gap:0.45rem;margin-top:0.8rem}
+.agent-steps code{display:block;background:#050508;border:1px solid #1a1a2e;color:#c8c8d0;padding:0.62rem 0.75rem;font-size:0.72rem;overflow-x:auto}
+.agent-note small{display:block;margin-top:0.75rem;font-size:0.6rem;color:#555;line-height:1.6}
+@media(max-width:680px){.agent-note-card{grid-template-columns:1fr;text-align:center}.agent-clawd{width:112px;height:112px}.agent-steps code{text-align:left}}
+
 /* ===== FACTIONS SECTION ===== */
 .factions-section{
   padding:3rem 1rem 4rem;
@@ -110,6 +127,34 @@ body::after{
 .scanline{position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,#00000015 2px,#00000015 4px);pointer-events:none;z-index:2}
 .crt{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:3;box-shadow:inset 0 0 80px #00000060;border-radius:2px}
 
+/* ===== SPRITE FOUNDRY ===== */
+.sprite-section{
+  padding:4rem 1rem 4.5rem;
+  background:linear-gradient(180deg,var(--bg) 0%,#0e0913 48%,var(--bg) 100%);
+  border-top:1px solid #1a1a2e;
+  border-bottom:1px solid #1a1a2e;
+}
+.sprite-intro{
+  text-align:center;font-size:0.72rem;color:#666;max-width:680px;margin:-0.8rem auto 2rem;line-height:1.8;
+}
+.sprite-hero-card{
+  max-width:1280px;margin:0 auto 2.7rem;padding:10px;border:1px solid #1a1a2e;
+  background:#0a0a14;box-shadow:0 0 60px #f973160d;
+}
+.sprite-hero-card img{display:block;width:100%;height:auto;background:#050508;image-rendering:auto}
+.sprite-caption{font-size:0.62rem;color:#555;text-align:right;padding-top:8px;letter-spacing:0.08em;text-transform:uppercase}
+.sprite-group{max-width:1200px;margin:0 auto 2.4rem}
+.sprite-group-title{
+  font-family:'Orbitron',monospace;font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:0.9rem;text-align:left;
+}
+.sprite-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.sprite-card{border:1px solid #1a1a2e;background:#090913;padding:10px;text-align:center;transition:border-color .25s,transform .25s}
+.sprite-card:hover{border-color:#f9731660;transform:translateY(-2px)}
+.sprite-card img{width:100%;max-width:160px;aspect-ratio:1/1;object-fit:contain;background:#030306;image-rendering:pixelated;border:1px solid #151526}
+.sprite-card.hd img{image-rendering:auto}
+.sprite-card .sprite-label{margin-top:8px;font-size:0.58rem;color:#666;letter-spacing:0.08em;text-transform:uppercase}
+
 /* ===== FOOTER ===== */
 .footer{
   text-align:center;padding:3rem 1rem 2rem;
@@ -137,6 +182,47 @@ body::after{
   <div class="coming-soon">Coming Soon</div>
   <p class="tagline">FTUX Focused Gamified Game Engine</p>
   <div class="scroll-hint">&#9660; Meet the Factions &#9660;</div>
+</section>
+
+<!-- NEW USER TERMINAL AGENT NOTE -->
+<section class="agent-note" id="terminal-agent-note">
+  <div class="agent-note-card">
+    <svg class="agent-clawd" viewBox="0 0 160 160" role="img" aria-labelledby="clawd-title clawd-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="clawd-title">Clawd the terminal helper</title>
+      <desc id="clawd-desc">A cute orange robot claw holding a command prompt.</desc>
+      <defs>
+        <linearGradient id="clawdGlow" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stop-color="#fbbf24"/><stop offset="1" stop-color="#f97316"/>
+        </linearGradient>
+      </defs>
+      <circle cx="80" cy="80" r="68" fill="#090913" stroke="#f97316" stroke-opacity="0.35"/>
+      <rect x="43" y="78" width="74" height="42" rx="8" fill="#111827" stroke="#f97316" stroke-opacity="0.55"/>
+      <path d="M58 95l10 7-10 7" fill="none" stroke="#22c55e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M77 111h27" stroke="#22c55e" stroke-width="5" stroke-linecap="round"/>
+      <path d="M52 74c-10-10-12-22-4-32 8-11 22-10 28 0" fill="none" stroke="url(#clawdGlow)" stroke-width="11" stroke-linecap="round"/>
+      <path d="M108 74c10-10 12-22 4-32-8-11-22-10-28 0" fill="none" stroke="url(#clawdGlow)" stroke-width="11" stroke-linecap="round"/>
+      <path d="M47 42l-12-15M48 42l15-11M113 42l12-15M112 42l-15-11" stroke="#fbbf24" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="61" cy="62" r="6" fill="#f97316"/><circle cx="99" cy="62" r="6" fill="#f97316"/>
+      <path d="M69 69c7 7 15 7 22 0" fill="none" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <h2>New here? Bring a terminal agent.</h2>
+      <p>
+        Especially for new users, this site is best used with the help of a terminal agent.
+        Ask it to clone tools, read docs, run demos, compare engines, and stitch parts together while you steer.
+      </p>
+      <p>Claude Code is a good starting claw:</p>
+      <div class="agent-steps" aria-label="Claude Code install commands">
+        <code>npm install -g @anthropic-ai/claude-code</code>
+        <code>cd your-game-or-tools-folder</code>
+        <code>claude</code>
+      </div>
+      <small>
+        Requires Node.js/npm and an Anthropic Claude account. Keep secrets out of prompts, review changes before committing,
+        and do not let any agent run random web code without checking it first.
+      </small>
+    </div>
+  </div>
 </section>
 
 <!-- FACTIONS -->
@@ -193,6 +279,20 @@ body::after{
       </div>
     </div>
   </div>
+</section>
+
+<!-- SPRITE FOUNDRY -->
+<section class="sprite-section" id="sprite-foundry">
+  <div class="section-title">Sprite Foundry</div>
+  <p class="sprite-intro">
+    Procedural pixel-asset batch: scene mood board, HD SDF renders, invaders, ships,
+    characters, and item glyphs ready to raid for prototypes.
+  </p>
+  <div class="sprite-hero-card">
+    <img src="assets/sprites/game_scene.png" alt="Generated game scene concept art">
+    <div class="sprite-caption">1280x720 · cinematic procedural game-scene concept</div>
+  </div>
+  <div id="sprite-gallery"></div>
 </section>
 
 <!--PARTS-BIN-START-->
@@ -312,6 +412,31 @@ body::after{
 </script>
 <script type="module">
 import * as THREE from 'three';
+
+const spriteSets = [
+  { title: 'Next-Gen SDF HD Render', prefix: 'sprite_hd_', count: 8, className: 'hd' },
+  { title: 'High-Bit Shaded Ships', prefix: 'sprite_highbit_', count: 12 },
+  { title: 'Classic Invaders', prefix: 'sprite_invader_', count: 7 },
+  { title: 'Detailed Ships / Characters', prefix: 'sprite_detailed_', count: 7 },
+  { title: 'Items / Abstract Glyphs', prefix: 'sprite_item_', count: 6 }
+];
+
+const spriteGallery = document.getElementById('sprite-gallery');
+if (spriteGallery) {
+  spriteGallery.innerHTML = spriteSets.map(set => `
+    <div class="sprite-group">
+      <h3 class="sprite-group-title">${set.title}</h3>
+      <div class="sprite-grid">
+        ${Array.from({ length: set.count }, (_, i) => `
+          <figure class="sprite-card ${set.className || ''}">
+            <img src="assets/sprites/${set.prefix}${i}.png" alt="${set.title} ${i}" loading="lazy">
+            <figcaption class="sprite-label">${set.prefix.replace(/^sprite_|_$/g, '')}${i}</figcaption>
+          </figure>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
 
 const WOBBLE = 0.004;
 const BG = 0x07070e;
