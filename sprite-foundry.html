@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frankenstengine — Sprite Foundry</title>
+<meta name="description" content="Frankenstengine Sprite Foundry: generated pixel sprites, ships, characters, invaders, and item glyphs.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+:root{
+  --bg:#07070e;--bg2:#0a0a14;--accent:#f97316;--dim:#333;
+  --green:#22c55e;--purple:#8b5cf6;--orange:#f97316;--cyan:#06b6d4;--grey:#a0a0a0;--blue:#3b82f6;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:#c8c8d0;font-family:'Share Tech Mono',monospace;overflow-x:hidden}
+
+/* Scanline overlay on entire page */
+body::after{
+  content:'';position:fixed;top:0;left:0;right:0;bottom:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,#00000012 3px,#00000012 6px);
+  pointer-events:none;z-index:9999;
+}
+
+/* ===== HERO ===== */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;text-align:center;padding:2rem 1rem;
+  background:radial-gradient(ellipse at 50% 30%,#12121e 0%,var(--bg) 70%);
+}
+.hero::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M30 0v60M0 30h60' stroke='%23ffffff06' stroke-width='0.5'/%3E%3C/svg%3E");
+  pointer-events:none;
+}
+
+.logo-text{
+  font-family:'Orbitron',monospace;font-weight:900;
+  font-size:clamp(2.2rem,7vw,5rem);letter-spacing:0.12em;
+  color:transparent;
+  background:linear-gradient(135deg,#f97316 0%,#fb923c 40%,#fbbf24 100%);
+  -webkit-background-clip:text;background-clip:text;
+  text-shadow:0 0 60px #f9731640,0 0 120px #f9731620;
+  position:relative;z-index:1;
+  animation:glow 4s ease-in-out infinite alternate;
+}
+@keyframes glow{
+  0%{filter:brightness(1) drop-shadow(0 0 20px #f9731630)}
+  100%{filter:brightness(1.15) drop-shadow(0 0 40px #f9731650)}
+}
+.coming-soon{
+  font-family:'Orbitron',monospace;font-weight:700;font-size:clamp(0.7rem,2vw,1rem);
+  letter-spacing:0.4em;text-transform:uppercase;
+  color:#f97316;margin-top:0.8rem;
+  border:1px solid #f9731640;padding:0.4em 1.5em;
+  position:relative;z-index:1;
+  animation:pulse-border 3s ease-in-out infinite;
+}
+@keyframes pulse-border{
+  0%,100%{border-color:#f9731630;box-shadow:0 0 10px #f9731610}
+  50%{border-color:#f9731680;box-shadow:0 0 20px #f9731630}
+}
+.tagline{
+  max-width:680px;margin-top:2rem;font-size:clamp(0.8rem,1.8vw,1.05rem);
+  color:#888;line-height:1.7;position:relative;z-index:1;
+}
+.tagline em{color:#bbb;font-style:normal}
+
+.scroll-hint{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  font-size:0.65rem;color:#444;letter-spacing:0.3em;text-transform:uppercase;
+  animation:bob 2s ease-in-out infinite;z-index:1;
+}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+/* ===== NEW USER NOTE ===== */
+.agent-note{
+  padding:3rem 1rem;background:linear-gradient(180deg,#080811 0%,#0d0a14 100%);
+  border-top:1px solid #1a1a2e;border-bottom:1px solid #1a1a2e;
+}
+.agent-note-card{
+  max-width:940px;margin:0 auto;display:grid;grid-template-columns:150px 1fr;gap:1.5rem;align-items:center;
+  border:1px solid #f9731630;background:#0a0a14;padding:1.3rem;box-shadow:0 0 45px #f973160e;
+}
+.agent-clawd{width:140px;height:140px;margin:auto;filter:drop-shadow(0 0 24px #f9731625)}
+.agent-note h2{font-family:'Orbitron',monospace;font-size:clamp(0.95rem,2.3vw,1.25rem);letter-spacing:0.13em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
+.agent-note p{font-size:0.78rem;color:#888;line-height:1.75;margin-bottom:0.9rem}
+.agent-steps{display:grid;gap:0.45rem;margin-top:0.8rem}
+.agent-steps code{display:block;background:#050508;border:1px solid #1a1a2e;color:#c8c8d0;padding:0.62rem 0.75rem;font-size:0.72rem;overflow-x:auto}
+.agent-note small{display:block;margin-top:0.75rem;font-size:0.6rem;color:#555;line-height:1.6}
+@media(max-width:680px){.agent-note-card{grid-template-columns:1fr;text-align:center}.agent-clawd{width:112px;height:112px}.agent-steps code{text-align:left}}
+
+/* ===== FACTIONS SECTION ===== */
+.factions-section{
+  padding:3rem 1rem 4rem;
+  background:linear-gradient(180deg,var(--bg) 0%,#0c0c18 50%,var(--bg) 100%);
+}
+.section-title{
+  text-align:center;font-family:'Orbitron',monospace;font-weight:700;
+  font-size:clamp(1rem,3vw,1.5rem);letter-spacing:0.15em;color:#666;
+  margin-bottom:2rem;text-transform:uppercase;
+}
+.gallery{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+  max-width:1200px;margin:0 auto;
+}
+@media(max-width:900px){.gallery{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.gallery{grid-template-columns:1fr}}
+
+.panel{
+  position:relative;border:1px solid #1a1a2e;overflow:hidden;
+  cursor:grab;aspect-ratio:3/4;min-height:300px;
+  background:var(--bg2);transition:border-color 0.3s;
+}
+.panel:hover{border-color:#f9731640}
+.panel:active{cursor:grabbing}
+.panel canvas{display:block;width:100%!important;height:100%!important}
+.label{
+  position:absolute;bottom:0;left:0;right:0;padding:12px 16px;
+  background:linear-gradient(transparent,#07070ecc 30%,#07070e);
+  pointer-events:none;z-index:4;
+}
+.label h2{font-family:'Orbitron',monospace;font-size:clamp(0.65rem,1.5vw,0.85rem);font-weight:700;margin-bottom:2px;letter-spacing:0.05em}
+.label .class{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:3px;opacity:0.8}
+.label p{font-size:0.6rem;color:#555;line-height:1.4}
+.scanline{position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,#00000015 2px,#00000015 4px);pointer-events:none;z-index:2}
+.crt{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:3;box-shadow:inset 0 0 80px #00000060;border-radius:2px}
+
+/* ===== SPRITE FOUNDRY ===== */
+.sprite-section{
+  padding:4rem 1rem 4.5rem;
+  background:linear-gradient(180deg,var(--bg) 0%,#0e0913 48%,var(--bg) 100%);
+  border-top:1px solid #1a1a2e;
+  border-bottom:1px solid #1a1a2e;
+}
+.sprite-intro{
+  text-align:center;font-size:0.72rem;color:#666;max-width:680px;margin:-0.8rem auto 2rem;line-height:1.8;
+}
+.sprite-hero-card{
+  max-width:1280px;margin:0 auto 2.7rem;padding:10px;border:1px solid #1a1a2e;
+  background:#0a0a14;box-shadow:0 0 60px #f973160d;
+}
+.sprite-hero-card img{display:block;width:100%;height:auto;background:#050508;image-rendering:auto}
+.sprite-caption{font-size:0.62rem;color:#555;text-align:right;padding-top:8px;letter-spacing:0.08em;text-transform:uppercase}
+.sprite-group{max-width:1200px;margin:0 auto 2.4rem}
+.sprite-group-title{
+  font-family:'Orbitron',monospace;font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:0.9rem;text-align:left;
+}
+.sprite-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.sprite-card{border:1px solid #1a1a2e;background:#090913;padding:10px;text-align:center;transition:border-color .25s,transform .25s}
+.sprite-card:hover{border-color:#f9731660;transform:translateY(-2px)}
+.sprite-card img{width:100%;max-width:160px;aspect-ratio:1/1;object-fit:contain;background:#030306;image-rendering:pixelated;border:1px solid #151526}
+.sprite-card.hd img{image-rendering:auto}
+.sprite-card .sprite-label{margin-top:8px;font-size:0.58rem;color:#666;letter-spacing:0.08em;text-transform:uppercase}
+
+
+/* ===== PAGE NAVIGATION ===== */
+.top-nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:center;gap:1rem;padding:0.75rem 1rem;background:#07070ecc;backdrop-filter:blur(10px);border-bottom:1px solid #1a1a2e}
+.top-nav a{font-family:'Orbitron',monospace;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:#888;text-decoration:none}
+.top-nav a:hover,.top-nav a.active{color:var(--accent)}
+.page-links{padding:4rem 1rem;background:linear-gradient(180deg,var(--bg) 0%,#0c0c18 100%);border-top:1px solid #1a1a2e}
+.page-link-grid{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.page-card{display:block;border:1px solid #1a1a2e;background:#0a0a14;padding:1.4rem;text-decoration:none;transition:border-color .25s,transform .25s,box-shadow .25s;min-height:155px}
+.page-card:hover{border-color:#f9731660;transform:translateY(-2px);box-shadow:0 0 40px #f973160d}
+.page-card h2{font-family:'Orbitron',monospace;font-size:0.9rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
+.page-card p{font-size:0.72rem;color:#777;line-height:1.8}
+.page-card .arrow{display:block;margin-top:1rem;font-size:0.65rem;color:#555;letter-spacing:0.15em;text-transform:uppercase}
+.page-kicker{text-align:center;font-size:0.72rem;color:#666;max-width:640px;margin:-0.8rem auto 2.2rem;line-height:1.8}
+@media(max-width:680px){.top-nav{gap:0.7rem}.top-nav a{font-size:0.55rem}.page-link-grid{grid-template-columns:1fr}.hero{padding-top:4rem}}
+
+/* ===== FOOTER ===== */
+.footer{
+  text-align:center;padding:3rem 1rem 2rem;
+  border-top:1px solid #1a1a2e;
+}
+.footer p{font-size:0.65rem;color:#333;letter-spacing:0.1em}
+.footer a{color:#f97316;text-decoration:none}
+.footer a:hover{text-decoration:underline}
+
+/* ===== FEATURES STRIP ===== */
+.features{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem 3rem;
+  max-width:900px;margin:2.5rem auto 0;position:relative;z-index:1;
+}
+.feature{text-align:center;flex:0 0 auto}
+.feature .icon{font-size:1.4rem;margin-bottom:0.3rem}
+.feature .text{font-size:0.65rem;color:#555;letter-spacing:0.08em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<nav class="top-nav" aria-label="Primary navigation"><a href="index.html">Home</a><a href="factions.html">Six Factions</a><a href="sprite-foundry.html" class="active">Sprite Foundry</a></nav>
+
+
+<!-- PAGE HERO -->
+<section class="hero" style="min-height:48vh;padding-top:5rem;">
+  <div class="logo-text">Sprite Foundry</div>
+  <p class="tagline">Procedural pixel-asset batches for prototype raiding.</p>
+  <div class="scroll-hint">&#9660; Browse assets &#9660;</div>
+</section>
+<!-- SPRITE FOUNDRY -->
+<section class="sprite-section" id="sprite-foundry">
+  <div class="section-title">Sprite Foundry</div>
+  <p class="sprite-intro">
+    Procedural pixel-asset batch: scene mood board, HD SDF renders, invaders, ships,
+    characters, and item glyphs ready to raid for prototypes.
+  </p>
+  <div class="sprite-hero-card">
+    <img src="assets/sprites/game_scene.png" alt="Generated game scene concept art">
+    <div class="sprite-caption">1280x720 · cinematic procedural game-scene concept</div>
+  </div>
+  <div id="sprite-gallery"></div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>&copy; 2026 DTR Labs Ltd. All rights reserved. All characters, lore, and game designs are original works.</p>
+  <p style="margin-top:0.6rem">&copy; 2026 Jonathan Hobman / Frankenstengine. All rights reserved.</p>
+</footer>
+
+<script>
+const spriteSets = [
+  { title: 'Next-Gen SDF HD Render', prefix: 'sprite_hd_', count: 8, className: 'hd' },
+  { title: 'High-Bit Shaded Ships', prefix: 'sprite_highbit_', count: 12 },
+  { title: 'Classic Invaders', prefix: 'sprite_invader_', count: 7 },
+  { title: 'Detailed Ships / Characters', prefix: 'sprite_detailed_', count: 7 },
+  { title: 'Items / Abstract Glyphs', prefix: 'sprite_item_', count: 6 }
+];
+
+const spriteGallery = document.getElementById('sprite-gallery');
+if (spriteGallery) {
+  spriteGallery.innerHTML = spriteSets.map(set => `
+    <div class="sprite-group">
+      <h3 class="sprite-group-title">${set.title}</h3>
+      <div class="sprite-grid">
+        ${Array.from({ length: set.count }, (_, i) => `
+          <figure class="sprite-card ${set.className || ''}">
+            <img src="assets/sprites/${set.prefix}${i}.png" alt="${set.title} ${i}" loading="lazy">
+            <figcaption class="sprite-label">${set.prefix.replace(/^sprite_|_$/g, '')}${i}</figcaption>
+          </figure>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+</script>
+
+</body>
+</html>
