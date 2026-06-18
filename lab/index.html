@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frankenstengine — The Lab</title>
+<meta name="description" content="The workshop. Live experiments and proofs-of-concept for mixed-initiative 3D creation: head-tracked parallax, AI-assisted sculpting, kitbash composition, digital puppetry. Build in public.">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:;">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+  :root{
+    --bg:#07070e; --bg2:#0a0a14; --accent:#f97316; --dim:#333;
+    --green:#22c55e; --purple:#8b5cf6; --orange:#f97316;
+    --cyan:#06b6d4; --grey:#a0a0a0; --blue:#3b82f6;
+    --text:#c8c8d0; --muted:#888;
+  }
+  html { scroll-behavior:smooth }
+  body { background:var(--bg); color:var(--text); font-family:'Share Tech Mono',monospace; line-height:1.7; overflow-x:hidden; }
+  body::after{
+    content:''; position:fixed; inset:0;
+    background:repeating-linear-gradient(0deg,transparent,transparent 3px,#00000012 3px,#00000012 6px);
+    pointer-events:none; z-index:9999;
+  }
+  a { color: var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  code { color:#fbbf24; background:#1a1a2e; padding:0.12em 0.4em; border-radius:3px; font-size:0.85em; }
+  em { color:#bbb; font-style:normal; }
+
+  /* HEADER */
+  header.lab-header {
+    padding: 2rem 1.5rem 1rem;
+    max-width: 980px; margin: 0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:1rem; flex-wrap:wrap;
+  }
+  .crumb a {
+    font-family:'Orbitron',monospace; font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase;
+    color:#666;
+  }
+  .crumb a:hover { color:var(--accent); text-decoration:none; }
+  .crumb .sep { color:#333; margin:0 0.5em; }
+  .crumb .here { color:var(--accent); }
+  .stage-tag {
+    font-family:'Orbitron',monospace; font-size:0.6rem; letter-spacing:0.25em; text-transform:uppercase;
+    color:var(--accent); border:1px solid #f9731640; padding:0.35em 1.1em; border-radius:3px;
+  }
+
+  /* HERO */
+  .lab-hero {
+    padding: 3rem 1.5rem 4rem;
+    max-width: 880px; margin: 0 auto;
+    text-align: center;
+  }
+  .lab-hero h1 {
+    font-family:'Orbitron',monospace; font-weight:900;
+    font-size: clamp(2rem, 6vw, 3.6rem); letter-spacing:0.1em;
+    background:linear-gradient(135deg,#f97316 0%,#fb923c 40%,#fbbf24 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    margin-bottom: 1rem;
+  }
+  .lab-hero .sub {
+    color: var(--muted); font-size: clamp(0.85rem, 1.7vw, 1rem); max-width: 640px; margin: 0 auto;
+  }
+
+  /* SECTION */
+  section.block {
+    padding: 2.5rem 1.5rem;
+    max-width: 880px; margin: 0 auto;
+    border-top: 1px solid #1a1a2e;
+  }
+  section.block h2 {
+    font-family:'Orbitron',monospace; font-weight:700;
+    font-size: clamp(1.1rem, 2.2vw, 1.4rem); letter-spacing:0.12em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 1.4rem;
+  }
+  section.block h3 {
+    font-family:'Orbitron',monospace; font-weight:700;
+    font-size: 0.85rem; letter-spacing: 0.18em; text-transform:uppercase;
+    color: #ddd; margin-top: 1.6rem; margin-bottom: 0.6rem;
+  }
+  section.block p { color:#aaa; font-size:0.88rem; margin-bottom:0.9rem; }
+  section.block ul { color:#aaa; font-size:0.88rem; padding-left:1.2rem; margin-bottom: 0.9rem; }
+  section.block li { margin-bottom:0.4rem; }
+
+  /* CARDS GRID */
+  .grid {
+    display:grid; gap:1rem;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+  .card {
+    border:1px solid #1a1a2e; border-radius:6px; padding:1.2rem 1.2rem 1.1rem;
+    background:linear-gradient(180deg, #0c0c18 0%, var(--bg) 100%);
+    position:relative;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover { border-color: #f9731640; }
+  .card.live::before {
+    content:'LIVE'; position:absolute; top:0.7rem; right:0.7rem;
+    font-family:'Orbitron',monospace; font-size:0.55rem; letter-spacing:0.2em;
+    color:#22c55e; border:1px solid #22c55e40; padding:0.2em 0.6em; border-radius:3px;
+  }
+  .card.planned::before {
+    content:'PLANNED'; position:absolute; top:0.7rem; right:0.7rem;
+    font-family:'Orbitron',monospace; font-size:0.55rem; letter-spacing:0.2em;
+    color:#888; border:1px solid #444; padding:0.2em 0.6em; border-radius:3px;
+  }
+  .card.poc::before {
+    content:'POC'; position:absolute; top:0.7rem; right:0.7rem;
+    font-family:'Orbitron',monospace; font-size:0.55rem; letter-spacing:0.2em;
+    color:#fbbf24; border:1px solid #fbbf2440; padding:0.2em 0.6em; border-radius:3px;
+  }
+  .card h4 {
+    font-family:'Orbitron',monospace; font-weight:700;
+    font-size:0.85rem; letter-spacing:0.12em; text-transform:uppercase;
+    color:#ddd; margin-bottom:0.7rem;
+  }
+  .card p { color:#888; font-size:0.78rem; line-height:1.6; margin-bottom: 0.8rem; }
+  .card a.cta {
+    font-family:'Orbitron',monospace; font-size:0.65rem; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--accent); border:1px solid #f9731640; padding:0.4em 1em; border-radius:3px;
+    display:inline-block;
+  }
+  .card a.cta:hover { background: #f9731620; text-decoration:none; }
+
+  /* MODES TABLE */
+  .modes {
+    display:grid; gap:1rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    margin-top: 1.2rem;
+  }
+  .mode {
+    border:1px solid #1a1a2e; border-radius:6px; padding:1.1rem;
+    background:#0a0a14;
+  }
+  .mode .tag {
+    font-family:'Orbitron',monospace; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .mode.create .tag { color: var(--cyan); }
+  .mode.perform .tag { color: var(--orange); }
+  .mode h3 { font-family:'Orbitron',monospace; margin: 0 0 0.6rem 0; font-size:1rem; letter-spacing:0.1em; text-transform:uppercase; }
+  .mode p { font-size:0.82rem; color:#999; }
+
+  /* FOOTER */
+  footer.lab-footer {
+    padding: 2.5rem 1.5rem 2rem; max-width: 880px; margin: 0 auto;
+    border-top: 1px solid #1a1a2e; color:#555; font-size:0.72rem; text-align:center;
+  }
+  footer.lab-footer p { margin-bottom: 0.4rem; }
+
+  /* HONESTY BLOCK */
+  .honesty {
+    border-left: 2px solid #f9731640; padding: 0.8rem 1.2rem;
+    background: rgba(249,115,22,0.04);
+    color: #aaa; font-size:0.82rem; margin-top: 1rem;
+  }
+  .honesty strong { color:#fbbf24; font-family:'Orbitron',monospace; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; display:block; margin-bottom:0.4rem; }
+</style>
+</head>
+<body>
+
+<header class="lab-header">
+  <div class="crumb">
+    <a href="/">Frankenstengine</a>
+    <span class="sep">/</span>
+    <span class="here">The Lab</span>
+  </div>
+  <span class="stage-tag">v0 &middot; Workshop</span>
+</header>
+
+<section class="lab-hero">
+  <h1>The Lab</h1>
+  <p class="sub">
+    Live experiments and proofs-of-concept on the way to a mixed-initiative
+    3D creation tool. What's here is rough, in motion, and built in public.
+  </p>
+</section>
+
+<!-- THESIS -->
+<section class="block">
+  <h2>One engine, two modes, five use cases</h2>
+  <p>
+    The thesis: <em>spatial selection as the bridge between manual and agent work in 3D.</em>
+    Paint a mask in 3D, tell the agent what to do, keep sculpting while it works.
+    Nobody has shipped this paradigm cleanly. The factions on the homepage are the
+    <em>characters</em>; the lab is where the engine that makes them gets built.
+  </p>
+
+  <div class="modes">
+    <div class="mode create">
+      <div class="tag">Mode 1</div>
+      <h3>Create</h3>
+      <p>Sculpt, kitbash, set-dress. Async-tolerant. Agent does heavy lifting in the background; the human does precision with a wand or controller. Head-tracked perspective sells depth without a headset.</p>
+    </div>
+    <div class="mode perform">
+      <div class="tag">Mode 2</div>
+      <h3>Perform</h3>
+      <p>Drive scenes live. Body trackers + voice puppeteer a digital character; the agent fills the gaps you aren't actively driving (idles, reactions, follow-through). Mixed-initiative puppetry.</p>
+    </div>
+  </div>
+
+  <h3>Use cases (in attack order)</h3>
+  <ul>
+    <li><strong style="color:#ddd">Standalone creation tool</strong> &mdash; solo creators, concept artists, indie devs.</li>
+    <li><strong style="color:#ddd">Content creation</strong> &mdash; the tool <em>is</em> the content; sculpt + agent dialogue + performance, recorded.</li>
+    <li><strong style="color:#ddd">Virtual D&amp;D / VTT</strong> &mdash; mid-session asset generation with a solo-GM puppet layer.</li>
+    <li><strong style="color:#ddd">Digital LARP</strong> &mdash; networked, multi-player, each viewer head-tracked. Heavy engineering, deep moat. (See: <em>The Larper</em>.)</li>
+    <li><strong style="color:#ddd">Gameplay-feature licensing</strong> &mdash; embed in survival/crafting games. After the first two have proven the UX in public.</li>
+  </ul>
+</section>
+
+<!-- DEMOS -->
+<section class="block">
+  <h2>Experiments</h2>
+  <div class="grid">
+
+    <div class="card live">
+      <h4>Head-tracked Parallax</h4>
+      <p>
+        The screen as a window. Webcam tracks your face; the rendered scene
+        shifts to maintain correct viewer-anchored perspective. Off-axis frustum
+        + MediaPipe face landmarks. Runs entirely in your browser.
+      </p>
+      <a class="cta" href="/parallax/">Open demo &rarr;</a>
+    </div>
+
+    <div class="card poc">
+      <h4>Kitbash + Voice Agent</h4>
+      <p>
+        Stitch parts together; talk to the agent to blend seams, adjust
+        proportions, retexture regions. Proof-of-concept clip incoming.
+        Voice channel via OpenWhispr.
+      </p>
+      <span class="cta" style="opacity:0.5;cursor:default">Coming &mdash; recorded clip</span>
+    </div>
+
+    <div class="card poc">
+      <h4>Paint-mask Region Editing</h4>
+      <p>
+        Paint a mask on the surface with the wand; tell the agent what to do
+        inside it. The bridge between manual and agent work. Proof-of-concept
+        on a single creature first.
+      </p>
+      <span class="cta" style="opacity:0.5;cursor:default">Coming &mdash; recorded clip</span>
+    </div>
+
+    <div class="card planned">
+      <h4>Digital Puppetry</h4>
+      <p>
+        6DOF body trackers + voice drive a character live. Agent fills gaps
+        when you aren't driving. The Perform-mode demo. Single puppet first;
+        networked LARP later.
+      </p>
+      <span class="cta" style="opacity:0.5;cursor:default">Planned</span>
+    </div>
+
+    <div class="card planned">
+      <h4>DTR &rarr; Frankenstengine bridge</h4>
+      <p>
+        Photograph real objects with <a href="https://dreamstoreality.app">Dreams to Reality</a>;
+        drop the reconstructed mesh into Frankenstengine as a kitbash part.
+        Unique parts pipeline.
+      </p>
+      <span class="cta" style="opacity:0.5;cursor:default">Planned</span>
+    </div>
+
+    <div class="card planned">
+      <h4>Live Link to Unreal / Godot</h4>
+      <p>
+        Stream sculpted geometry and puppet poses straight into a game engine
+        as you work. Sculpt-to-engine without an export step.
+      </p>
+      <span class="cta" style="opacity:0.5;cursor:default">Planned</span>
+    </div>
+
+  </div>
+
+  <div class="honesty">
+    <strong>Where we actually are</strong>
+    Mid-2026 AI 3D-generation makes <em>parts</em> reliably and <em>regions</em> unreliably.
+    The honest division of labour for v0: agent generates new parts and re-textures masked
+    regions; the human still does precision shaping. Visible seams are a feature, not a bug
+    &mdash; we're literally called Frankenstengine. Lean in.
+  </div>
+</section>
+
+<!-- BUILD IN PUBLIC -->
+<section class="block">
+  <h2>Build in public</h2>
+  <p>
+    Working notes, scout digests, and weekly progress. Everything that lives
+    here is rough by design. If you're working on adjacent stuff
+    (AI-assisted sculpting, head-tracked displays, VTT asset pipelines,
+    live puppetry, mixed-initiative tools) &mdash;
+    <a href="/">we want to hear from you</a>.
+  </p>
+
+  <h3>Recent</h3>
+  <ul>
+    <li>Head-tracked parallax demo wired up &mdash; off-axis frustum + MediaPipe face tracking.</li>
+    <li>Lab page goes up. Workshop is open.</li>
+  </ul>
+
+  <h3>Hygiene policy</h3>
+  <p>
+    No live generative-AI endpoints on this site yet. All "demos" are either
+    client-side (like the parallax page) or recorded. Live API integrations
+    sit behind auth and rate limits when they arrive. See
+    <a href="https://github.com/Jonohobs/frankenstengine-site/blob/main/BUILDING.md"><code>BUILDING.md</code></a>
+    for the policy.
+  </p>
+</section>
+
+<footer class="lab-footer">
+  <p>&copy; 2026 DTR Labs Ltd. All rights reserved.</p>
+  <p>&copy; 2026 Jonathan Hobman / Frankenstengine. The Lab is a v0 work-in-progress.</p>
+</footer>
+
+</body>
+</html>
